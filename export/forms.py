@@ -15,7 +15,7 @@ class Export(forms.Form):
         help_text='Designates export format.',
     )
     export_fields = forms.MultipleChoiceField(
-        choices=[('asc', 'Ascending'), ('desc', 'Descending')],
+        choices=[],
         required=False,
         label='Fields',
         help_text="Fields to be included in the exported data. If none are \
@@ -48,9 +48,12 @@ class Export(forms.Form):
         form_fields = forms.models.fields_for_model(model)
         for field in model._meta.fields:
             name = field.name
-            if name not in form_fields.keys():
+            if name in form_fields.keys():
+                form_field = form_fields[name]
+            else:
+                form_field = field.formfield()
+            if not form_field:
                 continue
-            form_field = form_fields[name]
             if form_field.__class__ in [forms.models.ModelChoiceField, \
                     forms.models.ModelMultipleChoiceField]:
                 self.fields[name] = getattr(fields, field.__class__.\
